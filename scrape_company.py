@@ -1,9 +1,8 @@
 from playwright.sync_api import sync_playwright
 import json
 
-def get_all_company_urls():
+def get_all_company_urls():  # Changed back to get all companies
     with open('content.txt', 'r') as f:
-        # Get all lines and strip whitespace
         urls = [line.strip() for line in f.readlines()]
     return urls
 
@@ -22,8 +21,7 @@ def main():
     companies_data = []
     failed_companies = []
     
-    # Get all company URLs
-    urls = get_all_company_urls()
+    urls = get_all_company_urls()  # Get all companies
     total_companies = len(urls)
     print(f"Found {total_companies} companies to process")
     
@@ -41,11 +39,28 @@ def main():
                 print(f"Opening {url}...")
                 page.goto(url)
                 
-                # Get the title
-                title = page.locator('h3.sm\\:block').first.text_content()
+                # Get the required data with individual try-except blocks
+                try:
+                    title = page.locator('h3.sm\\:block').first.text_content()
+                except:
+                    print(f"Error: Could not get title for {company_name}")
+                    failed_companies.append(company_name)
+                    continue
                 
-                # Get the description (first instance only)
-                description = page.locator('div.prose.max-w-full.whitespace-pre-line').first.text_content()
+                try:
+                    description = page.locator('div.prose.max-w-full.whitespace-pre-line').first.text_content()
+                except:
+                    print(f"Error: Could not get description for {company_name}")
+                    failed_companies.append(company_name)
+                    continue
+                
+                # Try to get logo URL, but don't fail if we can't find it
+                try:
+                    logo_element = page.locator('img.h-full.w-full.rounded-xl').first
+                    logo_url = logo_element.get_attribute('src', timeout=5000)  # Reduced timeout
+                except:
+                    print(f"Note: No logo found for {company_name}")
+                    logo_url = None
                 
                 # Get all URLs under the specific div
                 tag_links = page.locator('div.align-center.flex a[href^="/companies"]').all()
@@ -56,12 +71,13 @@ def main():
                     if tag:  # Only add if it's an industry or location tag
                         tags.append(tag)
                 
-                # Create company dictionary
+                # Create company dictionary with logo_url
                 company_data = {
                     "name": company_name,
                     "header": title,
                     "description": description,
-                    "tags": tags
+                    "tags": tags,
+                    "logo_url": logo_url
                 }
                 
                 # Add to companies list
