@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --yc-orange: #ff6b33;
+  --yc-orange-light: #ff8b5c;
+  --background: #fafafa;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Remove dark mode for now */
+    --background: #fafafa;
+    --foreground: #171717;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer components {
+  .company-card {
+    @apply bg-white rounded-xl p-6 shadow-sm transition-all duration-300 relative border border-gray-200 flex flex-col cursor-pointer no-underline text-inherit hover:-translate-y-1 hover:shadow-md hover:border-[var(--yc-orange-light)];
+  }
+
+  .company-number {
+    @apply absolute -top-3 -left-3 bg-[var(--yc-orange)] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm;
+  }
+
+  .tag {
+    @apply bg-gray-100 px-3 py-1.5 rounded-full text-sm text-gray-600 border border-gray-200;
+  }
+}
